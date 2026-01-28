@@ -59,13 +59,13 @@ export default function CalendarGrid() {
     return (
         <div className="flex flex-col h-full bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 overflow-hidden ring-1 ring-black/5">
             {/* Header */}
-            <div className="flex flex-col md:flex-row items-center justify-between px-6 py-5 border-b border-indigo-100/50 bg-white/50 backdrop-blur-md gap-6">
-                <div className="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto">
+            <div className="flex flex-col md:flex-row items-center justify-between px-6 py-3 border-b border-indigo-100/50 bg-white/50 backdrop-blur-md gap-4">
+                <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-600/10 rounded-xl text-blue-600">
-                            <CalendarIcon className="w-6 h-6" />
+                            <CalendarIcon className="w-5 h-5" />
                         </div>
-                        <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
+                        <h1 className="text-xl font-bold text-slate-800 tracking-tight">
                             Calendário
                         </h1>
                     </div>
@@ -115,7 +115,7 @@ export default function CalendarGrid() {
             {/* Week days header */}
             <div className="grid grid-cols-7 border-b border-indigo-50/50 bg-indigo-50/30 min-w-[600px] md:min-w-0">
                 {weekDays.map((day) => (
-                    <div key={day} className="py-3 text-center text-xs font-bold text-indigo-400 uppercase tracking-widest">
+                    <div key={day} className="py-2 text-center text-xs font-bold text-indigo-400 uppercase tracking-widest">
                         {day}
                     </div>
                 ))}
@@ -143,15 +143,15 @@ export default function CalendarGrid() {
                                 <div
                                     key={day.toString()}
                                     className={`
-                    min-h-[120px] border-b border-r border-slate-100 p-2 transition-all duration-300 hover:bg-white/80
+                    min-h-[90px] border-b border-r border-slate-100 p-1.5 transition-all duration-300 hover:bg-white/80
                     ${!isCurrentMonth ? 'bg-slate-50/50 text-slate-300' : 'bg-white/40'}
                     ${isTodayDate ? 'bg-blue-50/40 ring-inset ring-2 ring-blue-100' : ''}
                   `}
                                 >
-                                    <div className="flex justify-between items-start mb-2">
+                                    <div className="flex justify-between items-start mb-1">
                                         <span
                                             className={`
-                        text-sm font-semibold w-8 h-8 flex items-center justify-center rounded-lg transition-transform hover:scale-110
+                        text-xs font-semibold w-7 h-7 flex items-center justify-center rounded-lg transition-transform hover:scale-110
                         ${isTodayDate
                                                     ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30'
                                                     : isCurrentMonth ? 'text-slate-600' : 'text-slate-300'}
@@ -160,13 +160,13 @@ export default function CalendarGrid() {
                                             {format(day, 'd')}
                                         </span>
                                         {dayEvents.length > 0 && (
-                                            <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md hidden md:inline-block">
+                                            <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-1 py-0.5 rounded-md hidden md:inline-block">
                                                 {dayEvents.length}
                                             </span>
                                         )}
                                     </div>
 
-                                    <div className="flex flex-col gap-1.5 mt-1">
+                                    <div className="flex flex-col gap-1 mt-0.5">
                                         {dayEvents.map((event, idx) => (
                                             <EventCard
                                                 key={`${event.formattedDate}-${idx}`}
