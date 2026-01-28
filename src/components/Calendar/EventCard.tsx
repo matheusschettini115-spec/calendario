@@ -30,7 +30,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
                 onClick(event);
             }}
             className={`
-        px-2 py-1 text-xs font-semibold border-l-4 rounded-md cursor-pointer 
+        px-1.5 py-0.5 md:px-2 md:py-1 text-[10px] md:text-xs font-semibold border-l-4 rounded-md cursor-pointer 
         transition-all duration-200 truncate shadow-sm hover:shadow-md
         ${getStatusStyles(event.status)}
       `}
