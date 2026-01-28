@@ -57,13 +57,15 @@ export default function CalendarGrid() {
     const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
     return (
-        <div className="flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="flex flex-col h-full bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 overflow-hidden ring-1 ring-black/5">
             {/* Header */}
-            <div className="flex flex-col md:flex-row items-center justify-between px-4 md:px-6 py-4 border-b bg-white gap-4">
-                <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-                    <div className="flex items-center gap-2 text-blue-600">
-                        <CalendarIcon className="w-6 h-6" />
-                        <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+            <div className="flex flex-col md:flex-row items-center justify-between px-6 py-5 border-b border-indigo-100/50 bg-white/50 backdrop-blur-md gap-6">
+                <div className="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-600/10 rounded-xl text-blue-600">
+                            <CalendarIcon className="w-6 h-6" />
+                        </div>
+                        <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
                             Calendário
                         </h1>
                     </div>
@@ -72,38 +74,38 @@ export default function CalendarGrid() {
                         href={SPREADSHEET_LINK}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition-colors w-full md:w-auto justify-center"
+                        className="group flex items-center gap-2 px-4 py-2 text-sm font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-full border border-indigo-200/50 transition-all shadow-sm hover:shadow-md w-full md:w-auto justify-center"
                     >
                         <span>Acesse a planilha</span>
-                        <ExternalLink size={14} />
+                        <ExternalLink size={14} className="group-hover:translate-x-0.5 transition-transform" />
                     </a>
                 </div>
 
-                <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-between md:justify-end">
+                <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
                     <button
                         onClick={loadEvents}
                         disabled={loading}
-                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
+                        className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all disabled:opacity-50"
                         title="Atualizar dados"
                     >
                         <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
                     </button>
 
-                    <div className="flex items-center bg-gray-50 rounded-lg p-1 border border-gray-200">
-                        <button onClick={prevMonth} className="p-1 hover:bg-white hover:shadow-sm rounded-md transition-all text-gray-600">
+                    <div className="flex items-center bg-white rounded-xl p-1 shadow-sm border border-slate-200/60">
+                        <button onClick={prevMonth} className="p-1.5 hover:bg-slate-50 rounded-lg transition-colors text-slate-500 hover:text-slate-700">
                             <ChevronLeft className="w-5 h-5" />
                         </button>
-                        <div className="px-2 md:px-4 font-semibold text-gray-700 min-w-[120px] md:min-w-[140px] text-center capitalize text-sm md:text-base">
+                        <div className="px-4 font-semibold text-slate-700 min-w-[140px] text-center capitalize text-base">
                             {format(currentDate, 'MMMM yyyy', { locale: ptBR })}
                         </div>
-                        <button onClick={nextMonth} className="p-1 hover:bg-white hover:shadow-sm rounded-md transition-all text-gray-600">
+                        <button onClick={nextMonth} className="p-1.5 hover:bg-slate-50 rounded-lg transition-colors text-slate-500 hover:text-slate-700">
                             <ChevronRight className="w-5 h-5" />
                         </button>
                     </div>
 
                     <button
                         onClick={resetToToday}
-                        className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors whitespace-nowrap"
+                        className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 rounded-xl transition-all hover:scale-105 active:scale-95"
                     >
                         Hoje
                     </button>
@@ -111,9 +113,9 @@ export default function CalendarGrid() {
             </div>
 
             {/* Week days header */}
-            <div className="grid grid-cols-7 border-b bg-gray-50/50 min-w-[600px] md:min-w-0">
+            <div className="grid grid-cols-7 border-b border-indigo-50/50 bg-indigo-50/30 min-w-[600px] md:min-w-0">
                 {weekDays.map((day) => (
-                    <div key={day} className="py-2 text-center text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                    <div key={day} className="py-3 text-center text-xs font-bold text-indigo-400 uppercase tracking-widest">
                         {day}
                     </div>
                 ))}
@@ -121,15 +123,17 @@ export default function CalendarGrid() {
 
             {/* Calendar Grid */}
             {loading && events.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-3">
-                        <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
-                        <p className="text-gray-500 font-medium">Carregando eventos...</p>
+                <div className="flex-1 flex items-center justify-center bg-white/30 backdrop-blur-sm">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="p-4 bg-white/50 rounded-full shadow-xl">
+                            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                        </div>
+                        <p className="text-slate-500 font-medium animate-pulse">Carregando eventos...</p>
                     </div>
                 </div>
             ) : (
-                <div className="flex-1 overflow-y-auto overflow-x-auto">
-                    <div className="grid grid-cols-7 min-w-[600px] md:min-w-0 min-h-full auto-rows-fr">
+                <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar">
+                    <div className="grid grid-cols-7 min-w-[600px] md:min-w-0 min-h-full auto-rows-fr bg-slate-50/50">
                         {calendarDays.map((day, dayIdx) => {
                             const dayEvents = events.filter(e => isSameDay(e.date, day));
                             const isCurrentMonth = isSameMonth(day, monthStart);
@@ -139,30 +143,30 @@ export default function CalendarGrid() {
                                 <div
                                     key={day.toString()}
                                     className={`
-                                        min-h-[100px] md:min-h-[120px] border-b border-r p-1 md:p-2 transition-colors hover:bg-gray-50/30
-                                        ${!isCurrentMonth ? 'bg-gray-50/50 text-gray-400' : 'bg-white'}
-                                        ${isTodayDate ? 'bg-blue-50/30' : ''}
-                                    `}
+                    min-h-[120px] border-b border-r border-slate-100 p-2 transition-all duration-300 hover:bg-white/80
+                    ${!isCurrentMonth ? 'bg-slate-50/50 text-slate-300' : 'bg-white/40'}
+                    ${isTodayDate ? 'bg-blue-50/40 ring-inset ring-2 ring-blue-100' : ''}
+                  `}
                                 >
-                                    <div className="flex justify-between items-start mb-1">
+                                    <div className="flex justify-between items-start mb-2">
                                         <span
                                             className={`
-                                                text-xs md:text-sm font-medium w-6 h-6 md:w-7 md:h-7 flex items-center justify-center rounded-full
-                                                ${isTodayDate
-                                                    ? 'bg-blue-600 text-white shadow-md'
-                                                    : isCurrentMonth ? 'text-gray-700' : 'text-gray-400'}
-                                            `}
+                        text-sm font-semibold w-8 h-8 flex items-center justify-center rounded-lg transition-transform hover:scale-110
+                        ${isTodayDate
+                                                    ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30'
+                                                    : isCurrentMonth ? 'text-slate-600' : 'text-slate-300'}
+                      `}
                                         >
                                             {format(day, 'd')}
                                         </span>
                                         {dayEvents.length > 0 && (
-                                            <span className="text-[10px] md:text-xs font-medium text-gray-400 hidden md:inline">
+                                            <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md hidden md:inline-block">
                                                 {dayEvents.length}
                                             </span>
                                         )}
                                     </div>
 
-                                    <div className="flex flex-col gap-1 mt-1">
+                                    <div className="flex flex-col gap-1.5 mt-1">
                                         {dayEvents.map((event, idx) => (
                                             <EventCard
                                                 key={`${event.formattedDate}-${idx}`}

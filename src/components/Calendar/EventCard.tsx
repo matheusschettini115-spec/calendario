@@ -7,21 +7,19 @@ interface EventCardProps {
 
 export default function EventCard({ event, onClick }: EventCardProps) {
     const getStatusStyles = (status: string) => {
-        // Normalize status to lowercase for comparison if needed, but exact match is better if reliable
         const s = status?.trim();
 
         switch (s) {
             case 'Finalizada':
-                return 'bg-green-100 border-green-500 text-green-800 hover:bg-green-200';
+                return 'bg-gradient-to-br from-emerald-50 to-green-50 border-l-emerald-500 text-emerald-700 hover:from-emerald-100 hover:to-green-100 shadow-emerald-100';
             case 'Em Andamento':
-                return 'bg-yellow-100 border-yellow-500 text-yellow-800 hover:bg-yellow-200';
+                return 'bg-gradient-to-br from-amber-50 to-yellow-50 border-l-amber-500 text-amber-700 hover:from-amber-100 hover:to-yellow-100 shadow-amber-100';
             case 'Cancelada':
-                return 'bg-red-100 border-red-500 text-red-800 hover:bg-red-200';
+                return 'bg-gradient-to-br from-rose-50 to-red-50 border-l-rose-500 text-rose-700 hover:from-rose-100 hover:to-red-100 shadow-rose-100';
             case 'Não Iniciada':
-                return 'bg-white border-gray-300 text-gray-800 hover:bg-gray-50';
+                return 'bg-gradient-to-br from-slate-50 to-gray-50 border-l-slate-400 text-slate-700 hover:from-slate-100 hover:to-gray-100 shadow-slate-100';
             default:
-                // Default fallback
-                return 'bg-gray-100 border-gray-400 text-gray-800 hover:bg-gray-200';
+                return 'bg-gradient-to-br from-gray-50 to-slate-50 border-l-gray-400 text-gray-700 hover:from-gray-100 hover:to-slate-100 shadow-gray-100';
         }
     };
 
@@ -32,7 +30,8 @@ export default function EventCard({ event, onClick }: EventCardProps) {
                 onClick(event);
             }}
             className={`
-        px-2 py-1 mb-1 text-xs font-medium border-l-4 rounded-sm cursor-pointer transition-colors truncate
+        px-2.5 py-1.5 text-xs font-semibold border-l-4 rounded-md cursor-pointer 
+        transition-all duration-200 truncate shadow-sm hover:shadow-md
         ${getStatusStyles(event.status)}
       `}
             title={`${event.sector} - ${event.status}`}
