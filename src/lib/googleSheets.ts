@@ -2,8 +2,10 @@ import Papa from 'papaparse';
 import { parse } from 'date-fns';
 
 export interface CalendarEvent {
-  date: Date;
-  formattedDate: string; // for easier debugging/display
+  startDate: Date;
+  endDate: Date;
+  formattedStartDate: string;
+  formattedEndDate: string;
   sector: string;
   responsible: string;
   activity: string;
@@ -24,35 +26,44 @@ export async function fetchCalendarEvents(): Promise<CalendarEvent[]> {
         complete: (results) => {
           const events: CalendarEvent[] = results.data
             .map((row: any) => {
-              const dateStr = row['Data final'];
+              const startDateStr = row['Data inicial'];
+              const endDateStr = row['Data final'];
               const sector = row['Setor / Área'];
               const responsible = row['Responsável'];
               const activity = row['Atividade'];
               const status = row['Status'];
 
               // Skip rows without critical data
-              if (!dateStr || !sector) return null;
+              if (!startDateStr || !endDateStr || !sector) return null;
 
-              // Parse date "DD/MM/YYYY"
-              // Adjust format string if needed based on locale, but "dd/MM/yyyy" is standard for BR
-              let date: Date;
+              // Parse dates "DD/MM/YYYY"
+              let startDate: Date;
+              let endDate: Date;
+
               try {
-                // If the sheet uses slashes
-                if (dateStr.includes('/')) {
-                   date = parse(dateStr, 'dd/MM/yyyy', new Date());
+                // Parse start date
+                if (startDateStr.includes('/')) {
+                  startDate = parse(startDateStr, 'dd/MM/yyyy', new Date());
                 } else {
-                   // Fallback or generic parser if format varies? 
-                   // The prompt said "29/01/2026", so dd/MM/yyyy is expected.
-                   date = new Date(dateStr); 
+                  startDate = new Date(startDateStr);
+                }
+
+                // Parse end date
+                if (endDateStr.includes('/')) {
+                  endDate = parse(endDateStr, 'dd/MM/yyyy', new Date());
+                } else {
+                  endDate = new Date(endDateStr);
                 }
               } catch (e) {
-                console.error('Error parsing date:', dateStr, e);
+                console.error('Error parsing dates:', startDateStr, endDateStr, e);
                 return null;
               }
 
               return {
-                date,
-                formattedDate: dateStr,
+                startDate,
+                endDate,
+                formattedStartDate: startDateStr,
+                formattedEndDate: endDateStr,
                 sector,
                 responsible,
                 activity,

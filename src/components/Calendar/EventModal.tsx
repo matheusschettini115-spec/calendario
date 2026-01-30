@@ -63,20 +63,31 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
                         <div className="group">
                             <label className="flex items-center gap-2 text-sm font-semibold text-slate-500 mb-2">
                                 <Calendar className="w-4 h-4 text-blue-500" />
-                                Data Final
+                                Data Inicial
                             </label>
                             <div className="text-slate-900 font-semibold text-lg bg-gradient-to-br from-slate-50 to-blue-50 px-4 py-3 rounded-xl border border-slate-200/50 shadow-sm">
-                                {event.formattedDate}
+                                {event.formattedStartDate}
                             </div>
                         </div>
                         <div className="group">
                             <label className="flex items-center gap-2 text-sm font-semibold text-slate-500 mb-2">
-                                <Tag className="w-4 h-4 text-purple-500" />
-                                Status
+                                <Calendar className="w-4 h-4 text-indigo-500" />
+                                Data Final
                             </label>
-                            <div className={`px-4 py-3 rounded-xl font-semibold text-lg border shadow-sm ${getStatusColor(event.status)}`}>
-                                {event.status}
+                            <div className="text-slate-900 font-semibold text-lg bg-gradient-to-br from-slate-50 to-indigo-50 px-4 py-3 rounded-xl border border-slate-200/50 shadow-sm">
+                                {event.formattedEndDate}
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Status Row */}
+                    <div className="group">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-slate-500 mb-2">
+                            <Tag className="w-4 h-4 text-purple-500" />
+                            Status
+                        </label>
+                        <div className={`px-4 py-3 rounded-xl font-semibold text-lg border shadow-sm ${getStatusColor(event.status)}`}>
+                            {event.status}
                         </div>
                     </div>
 

@@ -12,7 +12,10 @@ import {
     eachDayOfInterval,
     isSameMonth,
     isSameDay,
-    isToday
+    isToday,
+    isWithinInterval,
+    startOfDay,
+    endOfDay
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Loader2, Calendar as CalendarIcon, RefreshCw, ExternalLink } from 'lucide-react';
@@ -135,7 +138,18 @@ export default function CalendarGrid() {
                 <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar">
                     <div className="grid grid-cols-7 min-w-[600px] md:min-w-0 min-h-full auto-rows-fr bg-slate-50/50">
                         {calendarDays.map((day, dayIdx) => {
-                            const dayEvents = events.filter(e => isSameDay(e.date, day));
+                            // Filter events that fall within this day's date range
+                            const dayEvents = events.filter(e => {
+                                const dayStart = startOfDay(day);
+                                const dayEnd = endOfDay(day);
+                                const eventStart = startOfDay(e.startDate);
+                                const eventEnd = endOfDay(e.endDate);
+
+                                // Check if day falls within the event's date range
+                                return isWithinInterval(dayStart, { start: eventStart, end: eventEnd }) ||
+                                    isWithinInterval(dayEnd, { start: eventStart, end: eventEnd }) ||
+                                    (dayStart <= eventStart && dayEnd >= eventEnd);
+                            });
                             const isCurrentMonth = isSameMonth(day, monthStart);
                             const isTodayDate = isToday(day);
 
@@ -169,7 +183,7 @@ export default function CalendarGrid() {
                                     <div className="flex flex-col gap-0.5 md:gap-1 mt-0.5">
                                         {dayEvents.map((event, idx) => (
                                             <EventCard
-                                                key={`${event.formattedDate}-${idx}`}
+                                                key={`${event.formattedStartDate}-${event.formattedEndDate}-${idx}`}
                                                 event={event}
                                                 onClick={(e) => {
                                                     setSelectedEvent(e);
