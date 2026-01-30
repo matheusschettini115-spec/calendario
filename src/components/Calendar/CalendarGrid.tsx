@@ -29,6 +29,7 @@ export default function CalendarGrid() {
     const [loading, setLoading] = useState(true);
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedSector, setSelectedSector] = useState<string>('all');
 
     const SPREADSHEET_LINK = 'https://docs.google.com/spreadsheets/d/12CGeY7acJRrVg05eYoNOY7TrO6tg2-FxqKAdnx0s7MU/edit?gid=0#gid=0';
 
@@ -59,6 +60,14 @@ export default function CalendarGrid() {
 
     const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
+    // Get unique sectors for filter
+    const uniqueSectors = Array.from(new Set(events.map(e => e.sector).filter(Boolean)));
+
+    // Filter events by selected sector
+    const filteredEvents = selectedSector === 'all'
+        ? events
+        : events.filter(e => e.sector === selectedSector);
+
     return (
         <div className="flex flex-col h-full bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 overflow-hidden ring-1 ring-black/5">
             {/* Header */}
@@ -82,6 +91,18 @@ export default function CalendarGrid() {
                         <span>Acesse a planilha</span>
                         <ExternalLink size={14} className="group-hover:translate-x-0.5 transition-transform" />
                     </a>
+
+                    {/* Sector Filter */}
+                    <select
+                        value={selectedSector}
+                        onChange={(e) => setSelectedSector(e.target.value)}
+                        className="px-4 py-2 text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 transition-all shadow-sm cursor-pointer w-full md:w-auto"
+                    >
+                        <option value="all">Todos os Setores</option>
+                        {uniqueSectors.sort().map(sector => (
+                            <option key={sector} value={sector}>{sector}</option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
@@ -138,7 +159,7 @@ export default function CalendarGrid() {
                 <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar">
                     <CalendarWeekRows
                         calendarDays={calendarDays}
-                        events={events}
+                        events={filteredEvents}
                         monthStart={monthStart}
                         onEventClick={(event) => {
                             setSelectedEvent(event);
@@ -269,7 +290,7 @@ function CalendarWeekRow({ week, events, monthStart, onEventClick }: {
     });
 
     const maxRows = Math.max(0, ...eventBars.map(b => b.row)) + 1;
-    const minHeight = 90 + (maxRows * 32); // Base height + event rows
+    const minHeight = 140 + (maxRows * 32); // Base height + event rows
 
     return (
         <div className="relative" style={{ minHeight: `${minHeight}px` }}>
@@ -283,7 +304,7 @@ function CalendarWeekRow({ week, events, monthStart, onEventClick }: {
                         <div
                             key={day.toString()}
                             className={`
-                                min-h-[90px] border-b border-r border-slate-100 p-1 md:p-1.5
+                                min-h-[140px] border-b border-r border-slate-100 p-1 md:p-1.5
                                 ${!isCurrentMonth ? 'bg-slate-50/50 text-slate-300' : 'bg-white/40'}
                                 ${isTodayDate ? 'bg-blue-50/40 ring-inset ring-2 ring-blue-100' : ''}
                             `}
