@@ -136,66 +136,15 @@ export default function CalendarGrid() {
                 </div>
             ) : (
                 <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar">
-                    <div className="grid grid-cols-7 min-w-[600px] md:min-w-0 min-h-full auto-rows-fr bg-slate-50/50">
-                        {calendarDays.map((day, dayIdx) => {
-                            // Filter events that fall within this day's date range
-                            const dayEvents = events.filter(e => {
-                                const dayStart = startOfDay(day);
-                                const dayEnd = endOfDay(day);
-                                const eventStart = startOfDay(e.startDate);
-                                const eventEnd = endOfDay(e.endDate);
-
-                                // Check if day falls within the event's date range
-                                return isWithinInterval(dayStart, { start: eventStart, end: eventEnd }) ||
-                                    isWithinInterval(dayEnd, { start: eventStart, end: eventEnd }) ||
-                                    (dayStart <= eventStart && dayEnd >= eventEnd);
-                            });
-                            const isCurrentMonth = isSameMonth(day, monthStart);
-                            const isTodayDate = isToday(day);
-
-                            return (
-                                <div
-                                    key={day.toString()}
-                                    className={`
-                    min-h-[70px] md:min-h-[90px] border-b border-r border-slate-100 p-1 md:p-1.5 transition-all duration-300 hover:bg-white/80
-                    ${!isCurrentMonth ? 'bg-slate-50/50 text-slate-300' : 'bg-white/40'}
-                    ${isTodayDate ? 'bg-blue-50/40 ring-inset ring-2 ring-blue-100' : ''}
-                  `}
-                                >
-                                    <div className="flex justify-between items-start mb-0.5 md:mb-1">
-                                        <span
-                                            className={`
-                        text-[10px] md:text-xs font-semibold w-6 h-6 md:w-7 md:h-7 flex items-center justify-center rounded-lg transition-transform hover:scale-110
-                        ${isTodayDate
-                                                    ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30'
-                                                    : isCurrentMonth ? 'text-slate-600' : 'text-slate-300'}
-                      `}
-                                        >
-                                            {format(day, 'd')}
-                                        </span>
-                                        {dayEvents.length > 0 && (
-                                            <span className="text-[8px] md:text-[9px] font-bold text-slate-400 bg-slate-100 px-1 py-0.5 rounded-md hidden md:inline-block">
-                                                {dayEvents.length}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <div className="flex flex-col gap-0.5 md:gap-1 mt-0.5">
-                                        {dayEvents.map((event, idx) => (
-                                            <EventCard
-                                                key={`${event.formattedStartDate}-${event.formattedEndDate}-${idx}`}
-                                                event={event}
-                                                onClick={(e) => {
-                                                    setSelectedEvent(e);
-                                                    setIsModalOpen(true);
-                                                }}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                    <CalendarWeekRows
+                        calendarDays={calendarDays}
+                        events={events}
+                        monthStart={monthStart}
+                        onEventClick={(event) => {
+                            setSelectedEvent(event);
+                            setIsModalOpen(true);
+                        }}
+                    />
                 </div>
             )}
 
@@ -205,6 +154,209 @@ export default function CalendarGrid() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
             />
+        </div>
+    );
+}
+
+// Helper component to render calendar weeks with continuous event bars
+function CalendarWeekRows({ calendarDays, events, monthStart, onEventClick }: {
+    calendarDays: Date[];
+    events: CalendarEvent[];
+    monthStart: Date;
+    onEventClick: (event: CalendarEvent) => void;
+}) {
+    // Split calendar days into weeks
+    const weeks: Date[][] = [];
+    for (let i = 0; i < calendarDays.length; i += 7) {
+        weeks.push(calendarDays.slice(i, i + 7));
+    }
+
+    return (
+        <div className="flex flex-col bg-slate-50/50">
+            {weeks.map((week, weekIdx) => (
+                <CalendarWeekRow
+                    key={weekIdx}
+                    week={week}
+                    events={events}
+                    monthStart={monthStart}
+                    onEventClick={onEventClick}
+                />
+            ))}
+        </div>
+    );
+}
+
+// Component to render a single week row with event bars
+function CalendarWeekRow({ week, events, monthStart, onEventClick }: {
+    week: Date[];
+    events: CalendarEvent[];
+    monthStart: Date;
+    onEventClick: (event: CalendarEvent) => void;
+}) {
+    // Find events that appear in this week
+    const weekStart = startOfDay(week[0]);
+    const weekEnd = endOfDay(week[6]);
+
+    const weekEvents = events.filter(event => {
+        const eventStart = startOfDay(event.startDate);
+        const eventEnd = endOfDay(event.endDate);
+
+        // Event overlaps with this week if:
+        // - Event starts during this week, OR
+        // - Event ends during this week, OR
+        // - Event spans across this week
+        return (
+            isWithinInterval(eventStart, { start: weekStart, end: weekEnd }) ||
+            isWithinInterval(eventEnd, { start: weekStart, end: weekEnd }) ||
+            (eventStart < weekStart && eventEnd > weekEnd)
+        );
+    });
+
+    // Calculate positioning for each event
+    interface EventBar {
+        event: CalendarEvent;
+        startCol: number; // 1-7
+        span: number; // number of days
+        row: number; // stacking row (0, 1, 2, etc.)
+    }
+
+    const eventBars: EventBar[] = [];
+
+    weekEvents.forEach(event => {
+        const eventStart = startOfDay(event.startDate);
+        const eventEnd = endOfDay(event.endDate);
+
+        // Calculate which column this event starts in (1-7)
+        let startCol = 1;
+        for (let i = 0; i < week.length; i++) {
+            if (isSameDay(week[i], eventStart) || (eventStart < week[i] && i === 0)) {
+                startCol = i + 1;
+                break;
+            }
+        }
+
+        // Calculate span (how many columns)
+        let span = 1;
+        const clampedStart = eventStart < weekStart ? weekStart : eventStart;
+        const clampedEnd = eventEnd > weekEnd ? weekEnd : eventEnd;
+
+        for (let i = 0; i < week.length; i++) {
+            const day = startOfDay(week[i]);
+            if (isWithinInterval(day, { start: clampedStart, end: clampedEnd })) {
+                if (i + 1 < startCol) startCol = i + 1;
+                span = Math.max(span, i - startCol + 2);
+            }
+        }
+
+        // Ensure span doesn't exceed week boundary
+        span = Math.min(span, 8 - startCol);
+
+        // Find available row for stacking
+        let row = 0;
+        let hasOverlap = true;
+        while (hasOverlap) {
+            hasOverlap = eventBars.some(bar => {
+                if (bar.row !== row) return false;
+                // Check if columns overlap
+                const barEnd = bar.startCol + bar.span - 1;
+                const thisEnd = startCol + span - 1;
+                return !(thisEnd < bar.startCol || startCol > barEnd);
+            });
+            if (hasOverlap) row++;
+        }
+
+        eventBars.push({ event, startCol, span, row });
+    });
+
+    const maxRows = Math.max(0, ...eventBars.map(b => b.row)) + 1;
+    const minHeight = 90 + (maxRows * 32); // Base height + event rows
+
+    return (
+        <div className="relative" style={{ minHeight: `${minHeight}px` }}>
+            {/* Grid for day cells */}
+            <div className="grid grid-cols-7 min-w-[600px] md:min-w-0">
+                {week.map((day) => {
+                    const isCurrentMonth = isSameMonth(day, monthStart);
+                    const isTodayDate = isToday(day);
+
+                    return (
+                        <div
+                            key={day.toString()}
+                            className={`
+                                min-h-[90px] border-b border-r border-slate-100 p-1 md:p-1.5
+                                ${!isCurrentMonth ? 'bg-slate-50/50 text-slate-300' : 'bg-white/40'}
+                                ${isTodayDate ? 'bg-blue-50/40 ring-inset ring-2 ring-blue-100' : ''}
+                            `}
+                        >
+                            <span
+                                className={`
+                                    text-[10px] md:text-xs font-semibold w-6 h-6 md:w-7 md:h-7 flex items-center justify-center rounded-lg
+                                    ${isTodayDate
+                                        ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30'
+                                        : isCurrentMonth ? 'text-slate-600' : 'text-slate-300'}
+                                `}
+                            >
+                                {format(day, 'd')}
+                            </span>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Event bars overlaid on grid */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="grid grid-cols-7 h-full min-w-[600px] md:min-w-0">
+                    {eventBars.map((bar, idx) => (
+                        <div
+                            key={idx}
+                            className="pointer-events-auto"
+                            style={{
+                                gridColumn: `${bar.startCol} / span ${bar.span}`,
+                                gridRow: 1,
+                                marginTop: `${32 + bar.row * 32}px`,
+                                height: '28px',
+                                zIndex: 10 + bar.row
+                            }}
+                        >
+                            <EventBar event={bar.event} onClick={() => onEventClick(bar.event)} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Component for a single event bar
+function EventBar({ event, onClick }: { event: CalendarEvent; onClick: () => void }) {
+    const getStatusColor = (status: string) => {
+        const s = status?.trim();
+        switch (s) {
+            case 'Finalizada':
+                return 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600';
+            case 'Em Andamento':
+                return 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600';
+            case 'Cancelada':
+                return 'bg-gradient-to-r from-rose-500 to-red-500 hover:from-rose-600 hover:to-red-600';
+            case 'Não Iniciada':
+                return 'bg-gradient-to-r from-slate-400 to-gray-400 hover:from-slate-500 hover:to-gray-500';
+            default:
+                return 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600';
+        }
+    };
+
+    return (
+        <div
+            onClick={onClick}
+            className={`
+                h-full mx-0.5 md:mx-1 px-2 rounded-md cursor-pointer
+                flex items-center text-white font-semibold text-[10px] md:text-xs
+                shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.02]
+                ${getStatusColor(event.status)}
+            `}
+            title={`${event.sector} - ${event.activity || 'Sem descrição'}`}
+        >
+            <span className="truncate">{event.sector}</span>
         </div>
     );
 }
